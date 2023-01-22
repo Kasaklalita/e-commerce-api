@@ -34,15 +34,18 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: database.get
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
     try:
         payload = jwt.decode(token, config('SECRET_KEY'),
                              algorithms=[config('ALGORITHM')])
         username: str = payload.get("sub")
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         if username is None:
             raise credentials_exception
         token_data = schemas.TokenData(username=username)
     except JWTError:
         raise credentials_exception
+    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     user = get_user(username=token_data.username, db=db)
     if user is None:
         raise credentials_exception

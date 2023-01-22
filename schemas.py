@@ -16,6 +16,5 @@ class User(BaseModel):
     email: str
     password: str
 
-
-class UserInDB(User):
-    hashed_password: str
+    class Config:
+        orm_mode = True

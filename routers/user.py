@@ -1,5 +1,9 @@
 from fastapi import APIRouter, Depends
-from .. import hashing, schemas, o2auth, models, database
+import hashing
+import schemas
+import o2auth
+import models
+import database
 
 router = APIRouter(tags=['user'])
 get_db = database.get_db
@@ -18,7 +22,8 @@ async def read_users_me(current_user: schemas.User = Depends(o2auth.get_current_
 @router.post('/registration')
 def user_registration(user: schemas.User, db: get_db = Depends()):
     user_info = user.dict(exclude_unset=True)
-    user_info['password'] = hashing.Hash.get_password_hash(user_info['password'])
+    user_info['password'] = hashing.Hash.get_password_hash(
+        user_info['password'])
     new_user = models.User(**user_info)
     db.add(new_user)
     db.commit()

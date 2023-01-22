@@ -2,9 +2,13 @@ from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from decouple import config
-from .. import schemas, o2auth, database, jwttoken
+import schemas
+import o2auth
+import database
+import jwttoken
 
 router = APIRouter(tags=['authentication'])
+
 
 @router.post("/token", response_model=schemas.Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: database.get_db = Depends()):
