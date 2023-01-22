@@ -8,7 +8,7 @@ from fastapi import File, UploadFile
 import secrets
 from PIL import Image
 
-router = APIRouter(tags=['user'])
+router = APIRouter(tags=['User'])
 get_db = database.get_db
 
 
@@ -18,7 +18,7 @@ async def read_users_me(current_user: schemas.User = Depends(o2auth.get_current_
 
 
 @router.post('/registration')
-def user_registration(user: schemas.User, db: get_db = Depends()):
+async def user_registration(user: schemas.UserBase, db: get_db = Depends()):
     user_info = user.dict(exclude_unset=True)
     user_info['password'] = hashing.Hash.get_password_hash(
         user_info['password'])

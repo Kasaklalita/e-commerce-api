@@ -47,6 +47,7 @@ class Product(BaseModel):
 
 
 class User(UserBase):
+    id: int
     businesses: List[BusinessBase] = []
 
 
