@@ -1,8 +1,7 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 import models
 import database
-from fastapi.security import OAuth2PasswordBearer
-from routers import authentication, user, product
+from routers import authentication, user, product, business
 from fastapi.staticfiles import StaticFiles
 
 
@@ -12,4 +11,5 @@ app = FastAPI()
 app.include_router(authentication.router)
 app.include_router(user.router)
 app.include_router(product.router)
+app.include_router(business.router)
 app.mount('/static', StaticFiles(directory='static'), name='static')

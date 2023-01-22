@@ -31,3 +31,15 @@ class Product(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class Business(BaseModel):
+    name: str
+    city: str
+    region: str
+    description: str
+    logo: str
+    owner_id: int
+
+    class Config:
+        orm_mode = True

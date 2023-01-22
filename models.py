@@ -18,10 +18,10 @@ class User(Base):
 class Business(Base):
     __tablename__ = "businesses"
     id = Column(Integer, primary_key=True, index=True)
-    business_name = Column(String(20), nullable=False, unique=True)
+    name = Column(String(20), nullable=False, unique=True)
     city = Column(String(100), nullable=False, default='Unspecified')
     region = Column(String(100), nullable=False, default='Unspecified')
-    business_description = Column(Text, nullable=True)
+    description = Column(Text, nullable=True)
     logo = Column(String, nullable=False, default='default.jpg')
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship('User', back_populates='businesses')
