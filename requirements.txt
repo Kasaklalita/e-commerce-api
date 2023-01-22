@@ -1,3 +1,4 @@
+aiofiles==22.1.0
 aiosmtplib==2.0.1
 anyio==3.6.2
 autopep8==2.0.1
@@ -18,6 +19,7 @@ MarkupSafe==2.1.2
 mypy-extensions==0.4.3
 passlib==1.7.4
 pathspec==0.10.3
+Pillow==9.4.0
 platformdirs==2.6.2
 psycopg2-binary==2.9.5
 pyasn1==0.4.8
