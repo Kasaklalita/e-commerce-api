@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
+from typing import List
 
 
 class Token(BaseModel):
@@ -11,10 +12,22 @@ class TokenData(BaseModel):
     username: str | None = None
 
 
-class User(BaseModel):
+class UserBase(BaseModel):
     username: str
     email: str
     password: str
+
+    class Config:
+        orm_mode = True
+
+
+class BusinessBase(BaseModel):
+    name: str
+    city: str
+    region: str
+    description: str
+    logo: str
+    owner_id: int
 
     class Config:
         orm_mode = True
@@ -33,13 +46,9 @@ class Product(BaseModel):
         orm_mode = True
 
 
-class Business(BaseModel):
-    name: str
-    city: str
-    region: str
-    description: str
-    logo: str
-    owner_id: int
+class User(UserBase):
+    businesses: List[BusinessBase] = []
 
-    class Config:
-        orm_mode = True
+
+class Business(BusinessBase):
+    products: List[Product] = []
