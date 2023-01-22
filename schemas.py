@@ -40,7 +40,7 @@ class Product(BaseModel):
     percentage_discount: int
     offer_expiration_data: date
     product_image: str
-    # business_id: int
+    business_id: int
 
     class Config:
         orm_mode = True

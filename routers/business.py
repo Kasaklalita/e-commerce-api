@@ -14,15 +14,24 @@ async def get_businesses(skip: int = 0, limit: int = 100, db: get_db = Depends()
 
 
 @router.post('/')
-async def add_new_business(business: schemas.Business, db: get_db = Depends()):
+async def add_new_business(business: schemas.BusinessBase, db: get_db = Depends()):
+    business_owner = db.query(models.User).filter(
+        models.User.id == business.owner_id).first()
+    if not business_owner:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Incorrect owner_id.")
     new_business = models.Business(**business.dict())
-    db.add(new_business)
-    db.commit()
-    db.refresh(new_business)
-    return new_business
+    try:
+        db.add(new_business)
+        db.commit()
+        db.refresh(new_business)
+        return new_business
+    except:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Business with this name already exists.")
 
 
-@router.get('/{id}')
+@router.get('/{id}', response_model=schemas.Business)
 async def get_business_details(id: int, db: get_db = Depends()):
     business = db.query(models.Business).filter(
         models.Business.id == id).first()
@@ -34,18 +43,22 @@ async def delete_business(id: int, db: get_db = Depends()):
     business = db.query(models.Business).filter(models.Business.id == id)
     if not business.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Business with id {id} not found")
+                            detail=f"Business with id {id} not found.")
     business.delete()
     db.commit()
-    return business
+    return 'deleted'
 
 
 @router.put('/{id}')
-def update_business(id: int, request: schemas.Business, db: get_db = Depends()):
+def update_business(id: int, request: schemas.BusinessBase, db: get_db = Depends()):
     business = db.query(models.Business).filter(models.Business.id == id)
     if not business.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'Business with id {id} not found')
-    business.update(request.dict())
-    db.commit()
-    return 'updated'
+                            detail=f'Business with id {id} not found.')
+    try:
+        business.update(request.dict())
+        db.commit()
+        return 'updated'
+    except:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Business with this name already exists.")

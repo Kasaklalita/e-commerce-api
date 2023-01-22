@@ -11,8 +11,10 @@ class User(Base):
     email = Column(String(200), nullable=False, unique=True)
     password = Column(String(100), nullable=False)
     is_verified = Column(Boolean, default=False)
-    join_date = Column(DateTime, default=datetime.utcnow)
-    businesses = relationship('Business', back_populates='owner')
+    join_date = Column(Date, default=datetime.utcnow)
+    profile_picture = Column(String, nullable=False, default='user.jpg')
+    businesses = relationship(
+        'Business', back_populates='owner', cascade="all,delete")
 
 
 class Business(Base):
@@ -22,10 +24,12 @@ class Business(Base):
     city = Column(String(100), nullable=False, default='Unspecified')
     region = Column(String(100), nullable=False, default='Unspecified')
     description = Column(Text, nullable=True)
-    logo = Column(String, nullable=False, default='default.jpg')
+    logo = Column(String, nullable=False, default='business.jpg')
     owner_id = Column(Integer, ForeignKey('users.id'))
-    owner = relationship('User', back_populates='businesses')
-    products = relationship('Product', back_populates='business')
+    owner = relationship(
+        'User', back_populates='businesses')
+    products = relationship(
+        'Product', back_populates='business', cascade="all,delete")
 
 
 class Product(Base):
@@ -37,6 +41,6 @@ class Product(Base):
     percentage_discount = Column(Integer)
     offer_expiration_data = Column(Date, default=datetime.utcnow)
     product_image = Column(String(200), nullable=False,
-                           default='productDefault.jpg')
+                           default='product.jpg')
     business_id = Column(Integer, ForeignKey('businesses.id'))
     business = relationship('Business', back_populates='products')
