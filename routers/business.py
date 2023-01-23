@@ -1,7 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 import schemas
 import models
 import database
+import o2auth
+import secrets
+from PIL import Image
 
 router = APIRouter(tags=['Businesses'], prefix='/businesses')
 get_db = database.get_db
@@ -62,3 +65,35 @@ def update_business(id: int, request: schemas.BusinessBase, db: get_db = Depends
     except:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"Business with this name already exists.")
+
+
+@router.post('/{id}/logo')
+async def upload_business_logo(id: int, file: UploadFile, user: schemas.User = Depends(o2auth.get_current_user), db: get_db = Depends()):
+    FILEPATH = './static/images'
+    filename = file.filename
+    extension = filename.split('.')[1]
+
+    if extension not in ['png', 'jpg']:
+        return {'status': 'error', 'detail': 'File extension not allowed'}
+
+    token_name = secrets.token_hex(10) + '.' + extension
+    generated_name = FILEPATH + '/' + token_name
+    file_content = await file.read()
+
+    updated_business = db.query(models.Business).filter(models.Business.id == id).first()
+    updated_business.update({'logo': generated_name[2:]})
+    db.commit()
+
+    with open(generated_name, 'wb') as file:
+        file.write(file_content)
+
+    # Resizing the image
+    img = Image.open(generated_name)
+    img = img.resize(size=(200, 200))
+    img.save(generated_name)
+
+    # product = db.query(models.Product).filter(models.Product.id == id).first()
+    # business = db.query(models.Business).filter(
+    #     models.Business.id == product.business_id)
+    # print(business)
+    return {'success': True}

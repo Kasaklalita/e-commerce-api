@@ -49,6 +49,8 @@ class Product(BaseModel):
 class User(UserBase):
     id: int
     businesses: List[BusinessBase] = []
+    join_date: date
+    profile_picture: str
 
 
 class Business(BusinessBase):
