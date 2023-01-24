@@ -34,6 +34,9 @@ async def add_new_product(product: schemas.Product, db: get_db = Depends(), user
 @router.get('/{id}')
 async def get_product_details(id: int, db: get_db = Depends()):
     product = db.query(models.Product).filter(models.Product.id == id).first()
+    if not product.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Product with id {id} not found.")
     return product
 
 

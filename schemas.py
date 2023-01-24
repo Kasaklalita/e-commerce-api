@@ -26,8 +26,6 @@ class BusinessBase(BaseModel):
     city: str
     region: str
     description: str
-    logo: str
-    owner_id: int
 
     class Config:
         orm_mode = True
@@ -54,4 +52,9 @@ class User(UserBase):
 
 
 class Business(BusinessBase):
+    logo: str
+    owner_id: int
+
+
+class BusinessExtended(Business):
     products: List[Product] = []

@@ -23,7 +23,8 @@ async def add_new_business(business: schemas.BusinessBase, db: get_db = Depends(
     if not business_owner:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Incorrect owner_id.")
-    new_business = models.Business(**business.dict())
+
+    new_business = models.Business(**business.dict() + {"owner_id": user.id})
     try:
         db.add(new_business)
         db.commit()
@@ -34,10 +35,13 @@ async def add_new_business(business: schemas.BusinessBase, db: get_db = Depends(
                             detail=f"Business with this name already exists.")
 
 
-@router.get('/{id}', response_model=schemas.Business)
+@router.get('/{id}', response_model=schemas.BusinessExtended)
 async def get_business_details(id: int, db: get_db = Depends()):
     business = db.query(models.Business).filter(
         models.Business.id == id).first()
+    if not business:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Business with id {id} not found.")
     return business
 
 
