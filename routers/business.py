@@ -17,7 +17,7 @@ async def get_businesses(skip: int = 0, limit: int = 100, db: get_db = Depends()
 
 
 @router.post('/')
-async def add_new_business(business: schemas.BusinessBase, db: get_db = Depends()):
+async def add_new_business(business: schemas.BusinessBase, db: get_db = Depends(), user: schemas.User = Depends(o2auth.get_current_user)):
     business_owner = db.query(models.User).filter(
         models.User.id == business.owner_id).first()
     if not business_owner:
@@ -42,29 +42,37 @@ async def get_business_details(id: int, db: get_db = Depends()):
 
 
 @router.delete('/{id}')
-async def delete_business(id: int, db: get_db = Depends()):
+async def delete_business(id: int, db: get_db = Depends(), user: schemas.User = Depends(o2auth.get_current_user)):
     business = db.query(models.Business).filter(models.Business.id == id)
     if not business.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Business with id {id} not found.")
+    owner_id = business.first().owner.id
+    if owner_id != user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"You are not the owner of this business.")
     business.delete()
     db.commit()
     return 'deleted'
 
 
 @router.put('/{id}')
-def update_business(id: int, request: schemas.BusinessBase, db: get_db = Depends()):
+def update_business(id: int, request: schemas.BusinessBase, db: get_db = Depends(), user: schemas.User = Depends(o2auth.get_current_user)):
     business = db.query(models.Business).filter(models.Business.id == id)
     if not business.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'Business with id {id} not found.')
+    owner_id = business.first().owner.id
+    if owner_id != user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"You are not the owner of this business.")
     try:
         business.update(request.dict())
         db.commit()
         return 'updated'
     except:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f"Business with this name already exists.")
+                            detail=f"Incorrect data.")
 
 
 @router.post('/{id}/logo')
@@ -74,13 +82,18 @@ async def upload_business_logo(id: int, file: UploadFile, user: schemas.User = D
     extension = filename.split('.')[1]
 
     if extension not in ['png', 'jpg']:
-        return {'status': 'error', 'detail': 'File extension not allowed'}
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"File extension is not allowed.")
 
     token_name = secrets.token_hex(10) + '.' + extension
     generated_name = FILEPATH + '/' + token_name
     file_content = await file.read()
 
-    updated_business = db.query(models.Business).filter(models.Business.id == id).first()
+    updated_business = db.query(models.Business).filter(
+        models.Business.id == id).first()
+    if updated_business.owner.id != user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"You are not the owner of this business.")
     updated_business.update({'logo': generated_name[2:]})
     db.commit()
 
@@ -92,8 +105,4 @@ async def upload_business_logo(id: int, file: UploadFile, user: schemas.User = D
     img = img.resize(size=(200, 200))
     img.save(generated_name)
 
-    # product = db.query(models.Product).filter(models.Product.id == id).first()
-    # business = db.query(models.Business).filter(
-    #     models.Business.id == product.business_id)
-    # print(business)
-    return {'success': True}
+    return 'success'
