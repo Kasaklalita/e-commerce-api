@@ -3,9 +3,10 @@ from datetime import datetime, timedelta
 from decouple import config
 import schemas
 from jose import JWTError
+from typing import Union
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
